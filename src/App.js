@@ -5,6 +5,7 @@ import Webcam from 'react-webcam';
 function App() {
   const webcamRef = useRef(null);
   const [imageSrc, setImageSrc] = useState(null);
+  const [closestPok, setClosestPok] = useState(null);
 
   const capture = () => {
     const imageSrc = webcamRef.current.getScreenshot();
@@ -26,13 +27,21 @@ function App() {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('https://ytterbic-malory-rayansailani-19e00628.koyeb.app/predict', {
+      const response = await fetch('http://127.0.0.1:5000/predict', {
         method: 'POST',
         body: formData
       });
       const result = await response.json();
       console.log(result);
+      setClosestPok(result);
     }
+  };
+
+
+  const videoConstraints = {
+    width: 1280,
+    height: 720,
+    facingMode: { ideal: "environment" } // Use "environment" for rear camera
   };
 
   return (
@@ -43,6 +52,7 @@ function App() {
         screenshotFormat="image/jpeg"
         width={320}
         height={240}
+        videoConstraints={videoConstraints}
       />
       <button onClick={capture}>Capture</button>
       {imageSrc && (
@@ -51,6 +61,8 @@ function App() {
           <button onClick={sendToServer}>Send to Server</button>
         </>
       )}
+      {closestPok && <p>{closestPok['closest_pokemon']} </p>}
+      {!closestPok && <p>Loading</p>}
     </div>
   );
 }
